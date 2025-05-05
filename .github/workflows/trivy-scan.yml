@@ -19,8 +19,17 @@ jobs:
     - name: Build Docker Image
       run: docker build -t nginx-sample:latest .
 
-    - name: Install Trivy
+    - name: Scan Docker Image with Trivy
       uses: aquasecurity/trivy-action@master
       with:
         scan-type: image
         image-ref: nginx-sample:latest
+        severity: CRITICAL,HIGH
+        exit-code: 1 # ❗ This fails the job if HIGH or CRITICAL vulns are found
+
+    - name: Optional - Scan Filesystem (Dockerfile, etc.)
+      uses: aquasecurity/trivy-action@master
+      with:
+        scan-type: fs
+        scan-ref: .
+        exit-code: 0 # Don't fail the build for file system scan (can change to 1 if strict)
